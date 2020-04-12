@@ -5,6 +5,7 @@
   "author": "dyuldinks",
   "license": "MIT",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "nanoid": "^3.1.3",
     "ramda": "^0.27.0"
