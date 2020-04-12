@@ -1,28 +1,57 @@
 import { classMap } from 'https://unpkg.com/lit-html/directives/class-map.js';
-import { html, component, useState, useEffect } from 'https://unpkg.com/haunted/haunted.js';
+import {
+  html,
+  component,
+  useState,
+  useEffect,
+  useCallback,
+} from 'https://unpkg.com/haunted/haunted.js';
+
+const API_GAME_PATH = `/api/game/${location.pathname.slice(1)}`;
 
 const renderWord = word => html`<li class=${classMap({ card: true })}>${word}</li>`;
 
-const renderBoard = ({ words }) =>
+const renderBoard = ({ words }, handleDblClick) =>
   html`
     <ul class="board">
-      ${words.map(renderWord)}
+      ${words.map(
+        (w, i) => html`
+          <div @dblclick=${e => handleDblClick(e, i)}>
+            ${renderWord(w)}
+          </div>
+        `,
+      )}
     </ul>
   `;
 
 const renderLoading = () => html`<div>Loading...</div>`;
 
-const App = () => {
+function App() {
   const [game, setGame] = useState(null);
   console.log(game);
   useEffect(() => {
-    fetch(`/api/game/${location.pathname.slice(1)}`)
+    fetch(API_GAME_PATH)
       .then(res => res.json())
       .then(setGame);
   }, []);
 
+  const handleDblClick = useCallback(
+    (e, idx) => {
+      fetch(`${API_GAME_PATH}/open`, {
+        method: 'POST',
+        body: JSON.stringify({ idx }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(res => res.json())
+        .then(({ opened }) => {
+          setGame({ ...game, opened });
+        });
+    },
+    [game],
+  );
+
   return html`
-    ${game ? renderBoard(game) : renderLoading()}
+    ${game ? renderBoard(game, handleDblClick) : renderLoading()}
     <style>
       .board {
         display: grid;
@@ -31,9 +60,8 @@ const App = () => {
         grid-gap: 12px;
         align-items: center;
         max-width: 920px;
-        /* background-color: #defefe; */
         list-style: none;
-        font-size: 1.6rem;
+        font-size: 1.25rem;
         margin: auto;
         padding: 16px;
       }
@@ -45,13 +73,18 @@ const App = () => {
       }
 
       .card {
-        padding: 4px 8px;
-        border: 1px solid #555;
+        display: flex;
+        /* justify-content: center; */
+        padding: 8px 16px 12px;
         border-radius: 4px;
         background-color: #fff;
+        box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+          0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+        /* text-transform: capitalize; */
+        cursor: pointer;
       }
     </style>
   `;
-};
+}
 
 customElements.define('codenames-app', component(App));

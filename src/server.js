@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const { generate } = require('nanoid');
 const R = require('ramda');
+const bodyParser = require('body-parser');
 const { prop, reverse } = R;
 
 // prettier-ignore
@@ -65,15 +66,15 @@ const createGame = () => {
 /* **************** MIDDLEWARES ***************** */
 
 const checkingGameExistence = (req, res, next) =>
-  // console.log(req.url, req.params, prop(req.params.gameName, games)) ||
   prop(req.params.gameName, games) ? next() : res.status(404).send('Game not found');
-
-/* ********************* API ******************** */
 
 app.use('*', (req, res, next) => {
   console.log(req.url, req.params);
   next();
 });
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 /* ******************* STATIC ******************* */
 
@@ -96,6 +97,16 @@ app.get('/:gameName', checkingGameExistence, (req, res) => {
 
 app.get('/api/game/:gameName', checkingGameExistence, (req, res) => {
   res.json(prop(req.params.gameName, games));
+});
+
+app.post('/api/game/:gameName/open', checkingGameExistence, (req, res) => {
+  console.log('open', req.body);
+  const justOpened = req.body;
+  const game = prop(req.params.gameName, games);
+  if (!game.opened.includes(justOpened.idx)) {
+    game.opened.push(justOpened.idx);
+  }
+  res.json({ opened: game.opened });
 });
 
 const PORT = 8000;
