@@ -5,9 +5,11 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'https://unpkg.com/haunted/haunted.js';
 
-const API_GAME_PATH = `/api/game/${location.pathname.slice(1)}`;
+const GAME_NAME = location.pathname.slice(1);
+const API_GAME_PATH = `/api/game/${GAME_NAME}`;
 
 const renderWord = word => html`<li class=${classMap({ card: true })}>${word}</li>`;
 
@@ -26,13 +28,40 @@ const renderBoard = ({ words }, handleDblClick) =>
 
 const renderLoading = () => html`<div>Loading...</div>`;
 
+const subscribe = setGame => {
+  const evtSource = new EventSource(`${API_GAME_PATH}/subscribe`);
+
+  evtSource.onmessage = event => {
+    console.log('SSE onmessage', event);
+    // setGame(event);
+    // subscribe(setGame);
+  };
+
+  evtSource.addEventListener('opened', msg => {
+    console.log('SSE opened', msg);
+    setGame(JSON.parse(msg.data));
+  });
+};
+
 function App() {
   const [game, setGame] = useState(null);
+  const gameRef = useRef(null);
+  gameRef.current = game;
   console.log(game);
+
   useEffect(() => {
     fetch(API_GAME_PATH)
       .then(res => res.json())
       .then(setGame);
+  }, []);
+
+  useEffect(() => {
+    const evtSource = new EventSource(`${API_GAME_PATH}/subscribe`);
+
+    evtSource.addEventListener('opened', msg => {
+      console.log('SSE opened', msg);
+      setGame({ ...gameRef.current, opened: JSON.parse(msg.data) });
+    });
   }, []);
 
   const handleDblClick = useCallback(
