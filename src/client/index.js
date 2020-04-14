@@ -13,7 +13,7 @@ const API_GAME_PATH = `/api/game/${GAME_NAME}`;
 
 const renderWord = word => html`<li class=${classMap({ card: true })}>${word}</li>`;
 
-const renderBoard = ({ words }, handleDblClick) =>
+const renderBoard = ({ words }, opened, handleDblClick) =>
   html`
     <ul class="board">
       ${words.map(
@@ -45,22 +45,23 @@ const subscribe = setGame => {
 
 function App() {
   const [game, setGame] = useState(null);
-  const gameRef = useRef(null);
+  const [opened, setOpened] = useState([]);
   gameRef.current = game;
   console.log(game);
 
   useEffect(() => {
     fetch(API_GAME_PATH)
       .then(res => res.json())
-      .then(setGame);
+      .then(({ opened, ...game }) => {
+        setGame(game);
+        setOpened(opened); // dynamic part of the game
+      });
   }, []);
 
   useEffect(() => {
     const evtSource = new EventSource(`${API_GAME_PATH}/subscribe`);
-
     evtSource.addEventListener('opened', msg => {
-      console.log('SSE opened', msg);
-      setGame({ ...gameRef.current, opened: JSON.parse(msg.data) });
+      setOpened(JSON.parse(msg.data));
     });
   }, []);
 
@@ -80,7 +81,7 @@ function App() {
   );
 
   return html`
-    ${game ? renderBoard(game, handleDblClick) : renderLoading()}
+    ${game ? renderBoard(game, opened, handleDblClick) : renderLoading()}
     <style>
       .board {
         display: grid;
