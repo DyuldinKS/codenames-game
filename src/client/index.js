@@ -28,12 +28,7 @@ const renderBoard = ({ words }, opened, handleDblClick) =>
 
 const renderLoading = () => html`<div>Loading...</div>`;
 
-function App() {
-  const [game, setGame] = useState(null);
-  const [opened, setOpened] = useState([]);
-  console.log(game);
-  console.log(opened);
-
+const useGameLoading = (setGame, setOpened) => {
   useEffect(() => {
     fetch(API_GAME_PATH)
       .then(res => res.json())
@@ -41,16 +36,22 @@ function App() {
         setGame(game);
         setOpened(opened); // dynamic part of the game
       });
+    // TODO: return fetch abort
   }, []);
+};
 
+const useSubscriptionToOpenedWords = setOpened => {
   useEffect(() => {
     const evtSource = new EventSource(`${API_GAME_PATH}/subscribe`);
     evtSource.addEventListener('opened', msg => {
       setOpened(JSON.parse(msg.data));
     });
+    // TODO: handle sse error
   }, []);
+};
 
-  const handleDblClick = useCallback(
+const useWordOpeningHandler = game =>
+  useCallback(
     (e, idx) => {
       fetch(`${API_GAME_PATH}/open`, {
         method: 'POST',
@@ -61,8 +62,17 @@ function App() {
     [game],
   );
 
+function App() {
+  const [game, setGame] = useState(null);
+  const [opened, setOpened] = useState([]);
+  console.log(game);
+  console.log(opened);
+
+  useGameLoading(setGame, setOpened);
+  useSubscriptionToOpenedWords(setOpened);
+
   return html`
-    ${game ? renderBoard(game, opened, handleDblClick) : renderLoading()}
+    ${game ? renderBoard(game, opened, useWordOpeningHandler(game)) : renderLoading()}
     <style>
       .board {
         display: grid;
