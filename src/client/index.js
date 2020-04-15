@@ -43,10 +43,21 @@ const useGameLoading = (setGame, setOpened) => {
 const useSubscriptionToOpenedWords = setOpened => {
   useEffect(() => {
     const evtSource = new EventSource(`${API_GAME_PATH}/subscribe`);
-    evtSource.addEventListener('opened', msg => {
-      setOpened(JSON.parse(msg.data));
+    let openedWords = [];
+
+    evtSource.addEventListener('open', () => {
+      setOpened(openedWords);
     });
-    // TODO: handle sse error
+
+    // message of opening new words
+    evtSource.addEventListener('opened', msg => {
+      openedWords = JSON.parse(msg.data);
+      setOpened(openedWords);
+    });
+
+    evtSource.addEventListener('error', () => {
+      setOpened(null);
+    });
   }, []);
 };
 
@@ -64,7 +75,7 @@ const useWordOpeningHandler = game =>
 
 function App() {
   const [game, setGame] = useState(null);
-  const [opened, setOpened] = useState([]);
+  const [opened, setOpened] = useState(null);
   console.log(game);
   console.log(opened);
 
@@ -72,7 +83,7 @@ function App() {
   useSubscriptionToOpenedWords(setOpened);
 
   return html`
-    ${game ? renderBoard(game, opened, useWordOpeningHandler(game)) : renderLoading()}
+    ${game && opened ? renderBoard(game, opened, useWordOpeningHandler(game)) : renderLoading()}
     <style>
       .board {
         display: grid;
