@@ -28,26 +28,11 @@ const renderBoard = ({ words }, opened, handleDblClick) =>
 
 const renderLoading = () => html`<div>Loading...</div>`;
 
-const subscribe = setGame => {
-  const evtSource = new EventSource(`${API_GAME_PATH}/subscribe`);
-
-  evtSource.onmessage = event => {
-    console.log('SSE onmessage', event);
-    // setGame(event);
-    // subscribe(setGame);
-  };
-
-  evtSource.addEventListener('opened', msg => {
-    console.log('SSE opened', msg);
-    setGame(JSON.parse(msg.data));
-  });
-};
-
 function App() {
   const [game, setGame] = useState(null);
   const [opened, setOpened] = useState([]);
-  gameRef.current = game;
   console.log(game);
+  console.log(opened);
 
   useEffect(() => {
     fetch(API_GAME_PATH)
@@ -71,11 +56,7 @@ function App() {
         method: 'POST',
         body: JSON.stringify({ idx }),
         headers: { 'Content-Type': 'application/json' },
-      })
-        .then(res => res.json())
-        .then(({ opened }) => {
-          setGame({ ...game, opened });
-        });
+      });
     },
     [game],
   );
