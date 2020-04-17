@@ -1,6 +1,6 @@
 const path = require('path');
 const express = require('express');
-const { generate } = require('nanoid');
+const { customAlphabet } = require('nanoid');
 const R = require('ramda');
 const bodyParser = require('body-parser');
 const { prop, propEq, reject, reverse } = R;
@@ -15,10 +15,7 @@ const DEFAULTS = {
 const app = express();
 
 const games = {};
-
-app.get('/', function (req, res) {
-  res.send('hello world');
-});
+const nanoid = customAlphabet('1234567890abcdef', 7);
 
 const randomFrom = xs => prop(Math.floor(Math.random() * xs.length), xs);
 const seq = (from, to) =>
@@ -81,13 +78,13 @@ app.use(bodyParser.json());
 
 app.use('/static', express.static(path.join(__dirname, 'client')));
 
-app.get('/start/:gameName', (req, res) => {
-  const gameName = req.params.gameName || generate('1234567890abcdef', 5);
+app.get(['/', /^\/start\/?$/], (req, res) => {
+  const gameName = nanoid();
+
   if (!prop(gameName, games)) {
     games[gameName] = createGame();
-    // console.log(games);
   }
-  res.redirect(`/${req.params.gameName}`);
+  res.redirect(`/${gameName}`);
 });
 
 app.get(['/:gameName', '/:gameName/admin'], checkingGameExistence, (req, res) => {
