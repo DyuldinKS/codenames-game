@@ -1,23 +1,20 @@
 import { classMap } from 'https://unpkg.com/lit-html/directives/class-map.js';
-import {
-  html,
-  component,
-  useState,
-  useEffect,
-  useCallback,
-} from 'https://unpkg.com/haunted/haunted.js';
+import { html, component, useState, useEffect } from 'https://unpkg.com/haunted/haunted.js';
 import { staticStyles } from './styles.js';
 
-const GAME_NAME = location.pathname.slice(1);
+const GAME_NAME = location.pathname.split('/')[1];
 const API_GAME_PATH = `/api/game/${GAME_NAME}`;
+const IS_ADMIN = /admin$/.test(location.pathname);
+
+const isWordOpened = (idx, opened) => opened.has(idx) || IS_ADMIN;
 
 const getWordTeamIdx = (idx, opened, teamWords) =>
-  opened.has(idx) ? teamWords.findIndex(wordIds => wordIds.has(idx)) : null;
+  isWordOpened(idx, opened) ? teamWords.findIndex(wordIds => wordIds.has(idx)) : null;
 
 const wordModifierByTeam = ['team-a', 'team-b'];
 
 const getWordModifier = (idx, opened, fail, teamIdx) => {
-  if (!opened.has(idx)) return 'closed';
+  if (!isWordOpened(idx, opened)) return 'closed';
   if (idx === fail) return 'fail';
   return wordModifierByTeam[teamIdx] ?? 'neutral';
 };
@@ -41,19 +38,16 @@ const renderBoard = ({ words, teamWords, fail }, opened, handleDblClick) =>
 
 const renderLoading = () => html`<div>Loading...</div>`;
 
-const usePermanentCallback = cb => useCallback(cb, []);
-
 const useGameState = initial => {
   const [game, setGame] = useState(initial);
   return [
     game,
-    usePermanentCallback(({ words, teamWords, fail }) =>
+    ({ words, teamWords, fail }) =>
       setGame({
         words,
         fail,
         teamWords: teamWords.map(ws => new Set(ws)),
       }),
-    ),
   ];
 };
 
@@ -62,7 +56,7 @@ const useOpenedWordsState = initial => {
   return [
     opened,
     openedIds => {
-      if (openedIds && (opened === null || opened.size === openedIds.length)) {
+      if (!opened || (openedIds && opened.size === openedIds.length)) {
         setOpened(new Set(openedIds));
       }
     },
@@ -99,7 +93,7 @@ const useSubscriptionToOpenedWords = setOpened => {
 };
 
 const useWordOpeningHandler = opened => (e, idx) => {
-  if (opened.has(idx)) return;
+  if (isWordOpened(idx, opened)) return;
   fetch(`${API_GAME_PATH}/open`, {
     method: 'POST',
     body: JSON.stringify({ idx }),
