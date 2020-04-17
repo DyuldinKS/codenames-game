@@ -65,13 +65,15 @@ const useOpenedWordsState = initial => {
 
 const useGameLoading = (setGame, setOpened) => {
   useEffect(() => {
-    fetch(API_GAME_PATH)
+    const controller = new AbortController();
+    fetch(API_GAME_PATH, { signal: controller.signal })
       .then(res => res.json())
       .then(({ opened, ...game }) => {
         setGame(game);
         setOpened(opened); // dynamic part of the game
       });
-    // TODO: return fetch abort
+
+    return () => controller.abort();
   }, []);
 };
 
