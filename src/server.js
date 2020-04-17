@@ -50,12 +50,10 @@ const splitIntoNTeams = (n, words) =>
 const createGame = () => {
   const { wordCountInGame, teamCount } = DEFAULTS;
   const words = getNRandomItems(wordCountInGame, DICT);
-  console.log(words);
   const [fail, ...activeWords] = getNRandomItems(
     (wordCountInGame - 1) * (teamCount / (teamCount + 1)) + 2,
     seq(0, words.length),
   );
-  console.log(fail, activeWords);
 
   return {
     words,
@@ -92,7 +90,7 @@ app.get('/start/:gameName', (req, res) => {
   res.redirect(`/${req.params.gameName}`);
 });
 
-app.get('/:gameName', checkingGameExistence, (req, res) => {
+app.get(['/:gameName', '/:gameName/admin'], checkingGameExistence, (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'index.html'));
 });
 
