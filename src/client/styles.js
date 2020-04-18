@@ -3,6 +3,14 @@ import { html } from 'https://unpkg.com/haunted/haunted.js';
 // prettier-ignore
 export const staticStyles = html`
   <style>
+    :host {
+      --white: #ffffff;
+      --blue: #b3e5fc;
+      --red: #ffcdd2;
+      --dark-grey: #616161;
+      --snow: #e0e0e0;
+    }
+
     .board {
       max-width: 920px;
       margin: auto;
@@ -34,27 +42,6 @@ export const staticStyles = html`
       user-select: none;
     }
 
-    .card--closed {
-      cursor: pointer;
-    }
-
-    .card--fail {
-      background-color: #37474f;
-      color: #fff;
-    }
-
-    .card--team-a {
-      background-color: #ef9a9a;
-    }
-
-    .card--team-b {
-      background-color: #81d4fa;
-    }
-
-    .card--neutral {
-      background-color: #e0e0e0;
-    }
-
     .counters {
       margin-top: 36px;
     }
@@ -71,3 +58,11 @@ export const staticStyles = html`
     }
   </style>
 `;
+
+const cssVar = x => `var(--${x})`;
+const bgColor = c => ({ backgroundColor: cssVar(c) });
+
+export const cursorPointer = { cursor: 'pointer' };
+export const teamStyles = ['blue', 'red'].map(bgColor);
+export const failWordStyles = { backgroundColor: cssVar('dark-grey'), color: cssVar('white') };
+export const neutralWordStyles = bgColor('snow');
