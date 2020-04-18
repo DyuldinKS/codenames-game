@@ -7,6 +7,7 @@ export const staticStyles = html`
       --white: #ffffff;
       --blue: #b3e5fc;
       --red: #ffcdd2;
+      --yellow: #fff9c4;
       --dark-grey: #616161;
       --snow: #e0e0e0;
     }
@@ -63,6 +64,6 @@ const cssVar = x => `var(--${x})`;
 const bgColor = c => ({ backgroundColor: cssVar(c) });
 
 export const cursorPointer = { cursor: 'pointer' };
-export const teamStyles = ['blue', 'red'].map(bgColor);
+export const teamStyles = ['blue', 'red', 'yellow'].map(bgColor);
 export const failWordStyles = { backgroundColor: cssVar('dark-grey'), color: cssVar('white') };
 export const neutralWordStyles = bgColor('snow');
