@@ -4,8 +4,11 @@
   "main": "index.js",
   "author": "dyuldinks",
   "license": "MIT",
+  "engines": {
+    "node": "12.13.x"
+  },
   "scripts": {
-    "dev": "nodemon -w src/server.js src/server.js"
+    "start": "node src/server.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
