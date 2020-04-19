@@ -3,11 +3,17 @@ import { html } from 'https://unpkg.com/haunted/haunted.js';
 // prettier-ignore
 export const staticStyles = html`
   <style>
+    :host {
+      font-family: 'Roboto', Helvetica, Arial;
+      font-size: 1rem;
+      margin: 0;
+      padding: 0;
+    }
+
     .board {
       max-width: 920px;
       margin: auto;
       padding: 16px;
-      font-size: 1rem;
     }
 
     .field {
@@ -58,6 +64,7 @@ export const staticStyles = html`
       cursor: pointer;
       background-color: transparent;
       font-size: 1rem;
+      font-family: 'Roboto', Helvetica, Arial;
     }
 
     .btn:hover {
