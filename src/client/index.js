@@ -1,10 +1,7 @@
 import { html, component, useState, useEffect } from 'https://unpkg.com/haunted/haunted.js';
 import { renderBoard } from './board.js';
 import { staticStyles } from './styles.js';
-
-const GAME_NAME = location.pathname.split('/')[1];
-const API_GAME_PATH = `/api/game/${GAME_NAME}`;
-const IS_ADMIN = /admin$/.test(location.pathname);
+import { IS_ADMIN, API_GAME_PATH } from './constants.js';
 
 const isWordOpened = (idx, opened) => opened.has(idx) || IS_ADMIN;
 
