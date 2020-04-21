@@ -8,7 +8,8 @@
     "node": "12.13.x"
   },
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server/index.js",
+    "dev": "nodemon -w ./src/server ./src/server/index.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
