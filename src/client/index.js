@@ -73,6 +73,7 @@ const useWordOpeningHandler = opened => (e, idx) => {
 };
 
 function App() {
+  // TODO: upgrade to SPA
   const [game, setGame] = useGameState(null);
   const [opened, setOpened] = useOpenedWordsState(null);
   console.log('RENDER', opened, game);
