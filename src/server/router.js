@@ -12,12 +12,10 @@ const staticRoutes = (app, { games, createGame, generateId }) => {
     if (!prop(gameName, games)) {
       games[gameName] = createGame(req.query);
     }
-    console.log('redirect', gameName);
     res.redirect(`/${gameName}`);
   });
 
   app.get(['/:gameName', '/:gameName/admin'], checkingGameExistence(games), (req, res) => {
-    console.log(path.join(__dirname, '..', 'client', 'index.html'));
     res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
   });
 };

@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const R = require('ramda');
 const bodyParser = require('body-parser');
+const debug = require('debug')('http:start');
 const { router } = require('./router');
 const game = require('./game');
 const { logMiddleware, errorHandler } = require('./middlewares');
@@ -16,5 +18,5 @@ router(app, game);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log('Listening port', PORT));
+const { PORT } = process.env;
+app.listen(PORT, () => debug('Listening port', PORT));
