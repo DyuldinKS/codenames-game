@@ -8,7 +8,7 @@ const seq = (from, to) =>
     .fill(0)
     .map((_, i) => i + from);
 
-const randomInt = (from, to) => Math.floor(Math.random() * (to - from)) + to;
+const randomInt = (from, to) => Math.floor(Math.random() * (from - to)) + to;
 
 const randomFrom = xs => prop(randomInt(0, xs.length), xs);
 
@@ -22,6 +22,20 @@ const shuffle = sort(() => 0.5 - Math.random());
 
 const isNumBetween = ([min, max]) => allPass([lte(min), gte(max)]);
 
+const timer = (ms, f) => {
+  const recursiveTimer = () =>
+    setTimeout(() => {
+      f();
+      to = recursiveTimer();
+    }, ms);
+
+  let to = recursiveTimer();
+
+  return () => {
+    clearTimeout(to);
+  };
+};
+
 module.exports = {
   generateId,
   seq,
@@ -29,4 +43,5 @@ module.exports = {
   getNRandomItems,
   shuffle,
   isNumBetween,
+  timer,
 };

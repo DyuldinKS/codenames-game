@@ -1,8 +1,10 @@
 const path = require('path');
 const express = require('express');
 const R = require('ramda');
+const debug = require('debug')('router');
 const { checkingGameExistence } = require('./middlewares');
-const { prop, equals, reject } = R;
+const { getSSE } = require('./sse');
+const { prop } = R;
 
 const staticRoutes = (app, { games, createGame, generateId }) => {
   app.use('/static', express.static(path.join(__dirname, '..', 'client')));
@@ -25,47 +27,26 @@ const api = (app, { games }) => {
     res.json(prop(req.params.gameName, games));
   });
 
-  const broadcastOpenedWords = (count => {
-    return ({ subscribers, opened }) => {
-      count += 1;
-      subscribers.forEach(send => {
-        send(count, 'opened', opened);
-      });
-    };
-  })(0);
-
   app.post('/api/game/:gameName/open', checkingGameExistence(games), (req, res) => {
     const justOpened = req.body;
-    const game = prop(req.params.gameName, games);
+    const { gameName } = req.params;
+    const game = prop(gameName, games);
     if (!game.opened.includes(justOpened.idx)) {
       game.opened.push(justOpened.idx);
     }
-    res.json({ opened: game.opened });
-    broadcastOpenedWords(game);
+    res.sendStatus(200);
+    getSSE(gameName).emit('opened', game.opened);
   });
 
-  const subsctiptionHander = (req, res) => {
-    const game = prop(req.params.gameName, games);
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    const send = (id, event, data) => {
-      res.write(`id: ${id}\n`);
-      res.write(`event: ${event}\n`);
-      res.write(`data: ${JSON.stringify(data)}\n\n`);
-    };
-
-    game.subscribers.push(send);
-
+  app.get('/api/game/:gameName/subscribe', checkingGameExistence(games), (req, res) => {
+    const sse = getSSE(req.params.gameName);
+    sse.subscribe(res);
     req.on('close', () => {
-      console.log('Connection closed by client');
-      game.subscribers = reject(equals(send), game.subscribers);
+      // TODO: generate id for clients
+      debug('SSE connection closed by client, subscribers left:', sse.subscribersCount());
+      sse.unsubscribe(res);
     });
-  };
-
-  app.get('/api/game/:gameName/subscribe', checkingGameExistence(games), subsctiptionHander);
+  });
 };
 
 const router = (...params) => {
