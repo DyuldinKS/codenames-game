@@ -1,6 +1,6 @@
 const { tap } = require('ramda');
 const { timer } = require('./utils');
-const debug = require('debug')('sse');
+const debug = require('debug')('cn:sse');
 const { equals, prop, reject } = require('ramda');
 
 const createSSE = id => {
@@ -15,6 +15,7 @@ const createSSE = id => {
   };
 
   const emit = (event, data) => {
+    debug('emit', id, event, data, '| sub count:', subscriberCount());
     count += 1;
     subscribers.forEach(res => {
       send(res, count, event, data);
@@ -33,27 +34,30 @@ const createSSE = id => {
       stopTimer = timer(process.env.HEROKU_SSE_PING_MS, () => {
         emit('ping', null);
       });
-      debug('start sse timer', id);
+      debug('start sse pings', id);
     }
 
     subscribers.push(tap(upgradeHTTP, res));
+    debug('subscribe', id, '| sub count:', subscriberCount());
   };
 
   const unsubscribe = res => {
     subscribers = reject(equals(res), subscribers);
+    debug('unsubscribe', id, '| sub count:', subscriberCount());
+
     if (subscribers.length === 0) {
-      debug('stop sse timer', id);
+      debug('stop sse pings', id);
       stopTimer();
     }
   };
 
-  const subscribersCount = () => subscribers.length;
+  const subscriberCount = () => subscribers.length;
 
   return {
     subscribe,
     unsubscribe,
     emit,
-    subscribersCount,
+    subscriberCount,
   };
 };
 

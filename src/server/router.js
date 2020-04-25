@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const R = require('ramda');
-const debug = require('debug')('router');
+const debug = require('debug')('cn:router');
 const { checkingGameExistence } = require('./middlewares');
 const { getSSE } = require('./sse');
 const { prop } = R;
@@ -43,8 +43,8 @@ const api = (app, { games }) => {
     sse.subscribe(res);
     req.on('close', () => {
       // TODO: generate id for clients
-      debug('SSE connection closed by client, subscribers left:', sse.subscribersCount());
       sse.unsubscribe(res);
+      debug('SSE connection closed by client');
     });
   });
 };
