@@ -6,7 +6,7 @@ const { equals, prop, reject } = require('ramda');
 const createSSE = id => {
   let count = 0;
   let subscribers = [];
-  let stopTimer = null; // workaround of closing connection by heroku
+  let pingTimer = null; // workaround of closing connection by heroku
 
   const send = (res, id, event, data) => {
     res.write(`id: ${id}\n`);
@@ -31,7 +31,7 @@ const createSSE = id => {
   const subscribe = res => {
     if (subscribers.length === 0) {
       // prevent heroku from closing the SSE connection by sending pings
-      stopTimer = timer(process.env.HEROKU_SSE_PING_MS, () => {
+      pingTimer = timer(process.env.HEROKU_SSE_PING_MS, () => {
         emit('ping', null);
       });
       debug('start sse pings', id);
@@ -47,7 +47,7 @@ const createSSE = id => {
 
     if (subscribers.length === 0) {
       debug('stop sse pings', id);
-      stopTimer();
+      pingTimer.stop();
     }
   };
 
@@ -56,7 +56,10 @@ const createSSE = id => {
   return {
     subscribe,
     unsubscribe,
-    emit,
+    emit: (...args) => {
+      pingTimer.postpone();
+      return emit(...args);
+    },
     subscriberCount,
   };
 };

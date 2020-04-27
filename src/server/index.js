@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const R = require('ramda');
 const bodyParser = require('body-parser');
 const debug = require('debug')('cn:http:start');
 const { router } = require('./router');

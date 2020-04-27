@@ -23,17 +23,24 @@ const shuffle = sort(() => 0.5 - Math.random());
 const isNumBetween = ([min, max]) => allPass([lte(min), gte(max)]);
 
 const timer = (ms, f) => {
-  const recursiveTimer = () =>
-    setTimeout(() => {
+  let to = null;
+  const recursiveTimer = () => {
+    stop();
+    to = setTimeout(() => {
       f();
-      to = recursiveTimer();
+      recursiveTimer();
     }, ms);
-
-  let to = recursiveTimer();
-
-  return () => {
-    clearTimeout(to);
   };
+
+  const stop = () => clearTimeout(to);
+  const postpone = () => {
+    stop();
+    recursiveTimer();
+  };
+
+  recursiveTimer();
+
+  return { stop, postpone };
 };
 
 module.exports = {
