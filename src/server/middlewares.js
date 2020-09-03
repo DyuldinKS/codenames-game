@@ -2,7 +2,7 @@ const { prop } = require('ramda');
 const debug = require('debug');
 
 const checkingGameExistence = games => (req, res, next) =>
-  prop(req.params.gameName, games) ? next() : res.status(404).send('Game not found');
+  prop(req.params.gameId, games) ? next() : res.status(404).send('Game not found');
 
 const logHttpReq = debug('cn:http:req');
 

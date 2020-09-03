@@ -9,37 +9,47 @@ const { prop } = R;
 const staticRoutes = (app, { games, createGame, generateId }) => {
   app.use('/static', express.static(path.join(__dirname, '..', 'client')));
 
-  app.get(['/', /^\/start\/?$/], (req, res) => {
-    const gameName = generateId();
-    if (!prop(gameName, games)) {
-      games[gameName] = createGame(req.query);
-    }
-    res.redirect(`/${gameName}`);
-  });
+  // app.get(['/', /^\/start\/?$/], (req, res) => {
+  //   const gameId = generateId();
+  //   if (!prop(gameId, games)) {
+  //     games[gameId] = createGame(req.query);
+  //   }
+  //   res.redirect(`/${gameId}`);
+  // });
 
-  app.get(['/:gameName', '/:gameName/admin'], checkingGameExistence(games), (req, res) => {
+  // app.get(['/:gameId', '/:gameId/admin'], checkingGameExistence(games), (req, res) => {
+  //   res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
+  // });
+
+  app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
   });
 };
 
-const api = (app, { games }) => {
-  app.get('/api/game/:gameName', checkingGameExistence(games), (req, res) => {
-    res.json(prop(req.params.gameName, games));
+const api = (app, { games, createGame }) => {
+  app.post('/api/game', (req, res) => {
+    const game = createGame(req.query);
+    games[game.id] = game;
+    res.send(game);
   });
 
-  app.post('/api/game/:gameName/open', checkingGameExistence(games), (req, res) => {
+  app.get('/api/game/:gameId', checkingGameExistence(games), (req, res) => {
+    res.json(prop(req.params.gameId, games));
+  });
+
+  app.post('/api/game/:gameId/open', checkingGameExistence(games), (req, res) => {
     const justOpened = req.body;
-    const { gameName } = req.params;
-    const game = prop(gameName, games);
+    const { gameId } = req.params;
+    const game = prop(gameId, games);
     if (!game.opened.includes(justOpened.idx)) {
       game.opened.push(justOpened.idx);
     }
     res.sendStatus(200);
-    getSSE(gameName).emit('opened', game.opened);
+    getSSE(gameId).emit('opened', game.opened);
   });
 
-  app.get('/api/game/:gameName/subscribe', checkingGameExistence(games), (req, res) => {
-    const sse = getSSE(req.params.gameName);
+  app.get('/api/game/:gameId/subscribe', checkingGameExistence(games), (req, res) => {
+    const sse = getSSE(req.params.gameId);
     sse.subscribe(res);
     req.on('close', () => {
       // TODO: generate id for clients

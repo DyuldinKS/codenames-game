@@ -35,6 +35,7 @@ const createGame = ({ size, teams }) => {
   );
 
   return {
+    id: generateId(),
     words,
     fail,
     teamWords: splitIntoNTeams(teamCount, activeWords),
