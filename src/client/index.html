@@ -5,11 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Codenames</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="/static/styles.css"></style>
-  <script src="https://unpkg.com/history"></script>
-  <script type="module" src="/static/index.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/styles.css">
+  </style>
+  <script src="/static/elm.bundle.js"></script>
 </head>
+
 <body>
-  <codenames-app />
+  <div id="elm-node"></div>
+  <script>
+    Elm.Main.init({
+      node: document.getElementById('elm-node'),
+    });
+  </script>
 </body>
+
 </html>
