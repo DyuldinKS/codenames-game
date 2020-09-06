@@ -3,11 +3,13 @@ module Main exposing (main)
 import Browser
 import Html exposing (Html, button, div, p, text, h1)
 import Html.Events exposing (onClick)
+import Html.Attributes as Attr
 
 import Http exposing (Error)
 import Json.Decode as D exposing (Decoder)
 
 import RemoteData as RData
+import Html exposing (Attribute)
 
 main =
   Browser.element { init = init, subscriptions = subscriptions, update = update, view = view }
@@ -105,8 +107,8 @@ httpErrorToString err =
 
 viewGame : Game -> Html msg 
 viewGame game =
-  div []
+  div [ Attr.class "board" ]
     [ h1 [] [text game.id]
-    , div [] (List.map (\word -> p [] [text word]) game.words)
+    , div [ Attr.class "field" ] (List.map (\word -> div [ Attr.class "card" ] [text word]) game.words)
     ]
 
