@@ -13,8 +13,12 @@
 <body>
   <div id="elm-node"></div>
   <script>
-    Elm.Main.init({
+    const app = Elm.Main.init({
       node: document.getElementById('elm-node'),
+    });
+
+    app.ports.pushUrl.subscribe(url => {
+      history.pushState({}, url, url);
     });
   </script>
 </body>

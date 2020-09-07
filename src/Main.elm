@@ -1,15 +1,14 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import Html exposing (Html, button, div, p, text, h1)
 import Html.Events exposing (onClick)
 import Html.Attributes as Attr
 
-import Http exposing (Error)
+import Http
 import Json.Decode as D exposing (Decoder)
 
 import RemoteData as RData
-import Html exposing (Attribute)
 
 main =
   Browser.element { init = init, subscriptions = subscriptions, update = update, view = view }
@@ -55,9 +54,16 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         GameCreationResponse response ->
-            ( { model | game = response }
-            , Cmd.none
-            )
+          let
+            cmd = case response of
+              RData.Success game ->
+                pushUrl game.id
+              _ ->
+                Cmd.none
+            in
+              ( { model | game = response }
+              , cmd
+              )
 
 
 
@@ -95,7 +101,7 @@ view model =
 
     RData.Failure err -> text ("Error: " ++  httpErrorToString err)
 
-    RData.Success news -> viewGame news
+    RData.Success game -> viewGame game
 
 httpErrorToString : Http.Error -> String
 httpErrorToString err =
@@ -112,3 +118,9 @@ viewGame game =
     , div [ Attr.class "field" ] (List.map (\word -> div [ Attr.class "card" ] [text word]) game.words)
     ]
 
+
+
+-- PORTS
+
+
+port pushUrl : String -> Cmd msg
