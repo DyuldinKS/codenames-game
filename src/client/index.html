@@ -6,21 +6,12 @@
   <title>Codenames</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/static/styles.css">
-  </style>
-  <script src="/static/elm.bundle.js"></script>
 </head>
 
 <body>
   <div id="elm-node"></div>
-  <script>
-    const app = Elm.Main.init({
-      node: document.getElementById('elm-node'),
-    });
-
-    app.ports.pushUrl.subscribe(url => {
-      history.pushState({}, url, url);
-    });
-  </script>
+  <script src="/static/elm.bundle.js"></script>
+  <script src="/static/main.bundle.js"></script>
 </body>
 
 </html>

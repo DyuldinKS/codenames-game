@@ -7,7 +7,7 @@ const { getSSE } = require('./sse');
 const { prop } = R;
 
 const staticRoutes = (app, { games, createGame, generateId }) => {
-  app.use('/static', express.static(path.join(__dirname, '..', 'client')));
+  app.use('/static', express.static(path.join(__dirname, '../../dist/')));
 
   // app.get(['/', /^\/start\/?$/], (req, res) => {
   //   const gameId = generateId();
