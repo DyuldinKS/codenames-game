@@ -34,7 +34,7 @@ module.exports = {
   entry: path.join(CLIENT_SRC, 'index.js'),
   output: {
     path: DIST,
-    filename: '[name].bundle.js',
+    filename: '[name].bundle.[contenthash].js',
     publicPath: '/static',
   },
   module: {
