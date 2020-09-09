@@ -6,8 +6,10 @@ const { checkingGameExistence } = require('./middlewares');
 const { getSSE } = require('./sse');
 const { prop } = R;
 
+const DIST_DIR = path.join(__dirname, '../../dist/');
+
 const staticRoutes = (app, { games, createGame, generateId }) => {
-  app.use('/static', express.static(path.join(__dirname, '../../dist/')));
+  app.use('/static', express.static(DIST_DIR));
 
   // app.get(['/', /^\/start\/?$/], (req, res) => {
   //   const gameId = generateId();
@@ -22,7 +24,7 @@ const staticRoutes = (app, { games, createGame, generateId }) => {
   // });
 
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
+    res.sendFile(path.join(DIST_DIR, 'index.html'));
   });
 };
 
