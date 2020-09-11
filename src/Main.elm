@@ -9,6 +9,7 @@ import Http
 import Json.Decode as D exposing (Decoder)
 
 import RemoteData as RData
+import Debug
 
 main =
   Browser.element { init = init, subscriptions = subscriptions, update = update, view = view }
@@ -40,7 +41,7 @@ init _ =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-  Sub.none
+  urlChangeListener UrlUpdate
 
 
 
@@ -49,21 +50,28 @@ subscriptions _ =
 
 type Msg
   = GameCreationResponse (RData.WebData Game)
+  -- | PushUrl String
+  | UrlUpdate String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    case msg of
-        GameCreationResponse response ->
-          let
-            cmd = case response of
-              RData.Success game ->
-                pushUrl game.id
-              _ ->
-                Cmd.none
-            in
-              ( { model | game = response }
-              , cmd
-              )
+  case msg of
+    GameCreationResponse response ->
+      let
+        cmd = case response of
+          RData.Success game ->
+            pushUrl game.id
+          _ ->
+            Cmd.none
+        in
+          ( { model | game = response }
+          , cmd
+          )
+    UrlUpdate url ->
+      let
+        x = Debug.log url
+      in
+        ( model, Cmd.none )
 
 
 
@@ -124,3 +132,4 @@ viewGame game =
 
 
 port pushUrl : String -> Cmd msg
+port urlChangeListener : (String -> msg)-> Sub msg
