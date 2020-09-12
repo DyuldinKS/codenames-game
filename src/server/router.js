@@ -62,8 +62,8 @@ const api = (app, { games, createGame }) => {
 };
 
 const router = (...params) => {
-  staticRoutes(...params);
   api(...params);
+  staticRoutes(...params);
 };
 
 exports.router = router;
