@@ -1,10 +1,12 @@
 const path = require('path');
 const { env } = require('process');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const CLIENT_SRC = path.join(__dirname, 'src/client');
 const DIST = path.join(__dirname, 'dist');
+const ELM_CHUNK = 'elm';
 
 const jsLoader = {
   test: /\.js$/,
@@ -45,17 +47,20 @@ module.exports = {
       cacheGroups: {
         vendor: {
           test: /Main.elm/,
-          name: 'elm',
+          name: ELM_CHUNK,
           chunks: 'all',
         },
       },
     },
   },
-  devtool: 'cheap-source-map',
+  devtool: false,
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(CLIENT_SRC, 'index.html'),
     }),
     new CleanWebpackPlugin(),
+    new webpack.SourceMapDevToolPlugin({
+      exclude: [ELM_CHUNK],
+    }),
   ],
 };
