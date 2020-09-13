@@ -48,12 +48,10 @@
     "*.{js,jsx}": [
       "prettier",
       "eslint --fix",
-      "git add",
       "eslint"
     ],
     "*.json": [
-      "prettier",
-      "git add"
+      "prettier"
     ]
   }
 }
