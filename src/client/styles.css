@@ -66,6 +66,11 @@ html, body {
   background-color: var(--light-grey);
 }
 
+.card--fail {
+  background-color: var(--dark-grey);
+  color: var(--white);
+}
+
 .counters {
   margin-top: 36px;
 }

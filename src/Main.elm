@@ -2,8 +2,7 @@ port module Main exposing (main)
 
 import Browser
 import Debug
-import Dict
-import Html exposing (Html, button, div, h1, p, text)
+import Html exposing (Html, button, div, text)
 import Html.Attributes as Attr
 import Html.Events exposing (onClick, onDoubleClick)
 import Http
@@ -16,7 +15,12 @@ import Set exposing (Set)
 
 
 main =
-    Browser.element { init = init, subscriptions = subscriptions, update = update, view = view }
+    Browser.element
+        { init = init
+        , subscriptions = subscriptions
+        , update = update
+        , view = view
+        }
 
 
 
@@ -32,9 +36,18 @@ type alias Model =
 type alias Game =
     { id : String
     , words : List Word
-    , teamWords : List (List Int)
-    , opened : Set Int
+    , teamWords : List (List WordId)
+    , opened : Set WordId
+    , fail : WordId
     }
+
+
+type alias Word =
+    String
+
+
+type alias WordId =
+    Int
 
 
 init : String -> ( Model, Cmd Msg )
@@ -82,14 +95,6 @@ extractGameId =
 -- UPDATE
 
 
-type alias Word =
-    String
-
-
-type alias WordId =
-    Int
-
-
 type Msg
     = StartGame String
     | GetGameResponse (RData.WebData Game)
@@ -97,7 +102,6 @@ type Msg
     | OpenWordRequest WordId
     | OpenWordResponse WordId (RData.WebData ())
     | UpdateOpenedWords (List WordId)
-      -- | PushUrl String
     | UrlUpdate String
 
 
@@ -202,11 +206,12 @@ createGame =
 
 gameDecoder : Decoder Game
 gameDecoder =
-    D.map4 Game
+    D.map5 Game
         (D.field "id" D.string)
         (D.field "words" (D.list D.string))
         (D.field "teamWords" (D.list (D.list D.int)))
         (D.field "opened" (D.map Set.fromList (D.list D.int)))
+        (D.field "fail" D.int)
 
 
 apiOpenWord : String -> WordId -> Cmd Msg
@@ -275,7 +280,8 @@ viewWord game id word =
 getWordClassList : Game -> WordId -> List ( String, Bool )
 getWordClassList game wordId =
     [ ( "card", True )
-    , ( getWordTeamClass game wordId, Set.member wordId game.opened )
+    , ( getWordTeamClass game wordId, wordId /= game.fail && Set.member wordId game.opened )
+    , ( "card--fail", wordId == game.fail )
     ]
 
 
