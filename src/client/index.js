@@ -10,7 +10,24 @@ const app = Elm.Main.init({
 const history = createBrowserHistory();
 
 app.ports.pushUrl.subscribe(url => {
+  console.log('pushUrl', url);
   history.push(url);
+});
+
+app.ports.listenGameUpdates.subscribe(url => {
+  console.log('listenGameUpdates', url);
+  const evtSource = new EventSource(url);
+  let openedWords = [];
+
+  // message of opening new words
+  evtSource.addEventListener('opened', msg => {
+    openedWords = JSON.parse(msg.data);
+    app.ports.openedWordsListener.send(openedWords);
+  });
+
+  evtSource.addEventListener('error', () => {
+    // server fail? try to resubscribe?
+  });
 });
 
 history.listen(({ location }) => {

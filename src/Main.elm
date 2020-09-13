@@ -46,7 +46,10 @@ init pathname =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    urlChangeListener UrlUpdate
+    Sub.batch
+        [ urlChangeListener UrlUpdate
+        , openedWordsListener UpdateOpenedWords
+        ]
 
 
 getRegex : String -> Regex
@@ -90,6 +93,7 @@ type Msg
     | CreateGameResponse (RData.WebData Game)
     | OpenWordRequest WordId
     | OpenWordResponse WordId (RData.WebData ())
+    | UpdateOpenedWords (List WordId)
       -- | PushUrl String
     | UrlUpdate String
 
@@ -110,20 +114,26 @@ update msg model =
                     ( { model | game = RData.Loading }, createGame )
 
         GetGameResponse response ->
-            ( { model | game = response }, Cmd.none )
+            ( { model | game = response }
+            , case response of
+                RData.Success game ->
+                    listenGameUpdates <| apiGameSubscribe game.id
+
+                _ ->
+                    Cmd.none
+            )
 
         CreateGameResponse response ->
-            let
-                cmd =
-                    case response of
-                        RData.Success game ->
-                            pushUrl game.id
-
-                        _ ->
-                            Cmd.none
-            in
             ( { model | game = response }
-            , cmd
+            , case response of
+                RData.Success game ->
+                    Cmd.batch
+                        [ listenGameUpdates <| apiGameSubscribe game.id
+                        , pushUrl ("/" ++ game.id)
+                        ]
+
+                _ ->
+                    Cmd.none
             )
 
         OpenWordRequest wordId ->
@@ -136,18 +146,12 @@ update msg model =
                     Cmd.none
             )
 
+        UpdateOpenedWords openedWords ->
+            ( { model | game = RData.map (updateGameOpenedWords openedWords) model.game }, Cmd.none )
+
         OpenWordResponse wordId response ->
-            case response of
-                RData.Success () ->
-                    case model.game of
-                        RData.Success game ->
-                            ( { model | game = RData.Success { game | opened = wordId :: game.opened } }, Cmd.none )
-
-                        _ ->
-                            ( model, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+            -- maybe retry on failure?
+            ( model, Cmd.none )
 
         UrlUpdate url ->
             let
@@ -157,19 +161,29 @@ update msg model =
             ( model, Cmd.none )
 
 
+updateGameOpenedWords : List WordId -> Game -> Game
+updateGameOpenedWords openedWords game =
+    { game | opened = openedWords }
+
+
 
 -- HTTP
 
 
-gameApi : String -> String
-gameApi path =
-    "/api/game" ++ path
+apiGame : String -> String
+apiGame path =
+    "/api/game/" ++ path
+
+
+apiGameSubscribe : String -> String
+apiGameSubscribe gameId =
+    apiGame <| gameId ++ "/subscribe"
 
 
 getGame : String -> Cmd Msg
 getGame gameId =
     Http.get
-        { url = gameApi ("/" ++ gameId)
+        { url = apiGame gameId
         , expect = Http.expectJson (RData.fromResult >> GetGameResponse) gameDecoder
         }
 
@@ -177,7 +191,7 @@ getGame gameId =
 createGame : Cmd Msg
 createGame =
     Http.post
-        { url = gameApi ""
+        { url = apiGame ""
         , body = Http.emptyBody
         , expect = Http.expectJson (RData.fromResult >> CreateGameResponse) gameDecoder
         }
@@ -195,7 +209,7 @@ gameDecoder =
 apiOpenWord : String -> WordId -> Cmd Msg
 apiOpenWord gameId wordId =
     Http.post
-        { url = gameApi <| "/" ++ gameId ++ "/open"
+        { url = apiGame <| gameId ++ "/open"
         , body = Http.jsonBody <| E.object [ ( "idx", E.int wordId ) ]
         , expect = Http.expectWhatever (RData.fromResult >> OpenWordResponse wordId)
         }
@@ -258,4 +272,10 @@ viewWord gameId id word =
 port pushUrl : String -> Cmd msg
 
 
+port listenGameUpdates : String -> Cmd msg
+
+
 port urlChangeListener : (String -> msg) -> Sub msg
+
+
+port openedWordsListener : (List Int -> msg) -> Sub msg
