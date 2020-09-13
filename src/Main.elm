@@ -4,8 +4,10 @@ import Browser
 import Html exposing (Html, button, div, p, text, h1)
 import Html.Events exposing (onClick)
 import Html.Attributes as Attr
+import Html.Events exposing (onDoubleClick)
 
 import Http
+import Json.Encode as E
 import Json.Decode as D exposing (Decoder)
 
 import RemoteData as RData
@@ -26,7 +28,7 @@ type alias Model
 
 type alias Game =
   { id: String
-  , words: List String
+  , words: List Word
   , teamWords: List (List Int)
   , opened: List Int
   } 
@@ -68,12 +70,16 @@ extractGameId =
 
 -- UPDATE
 
+type alias Word = String
+type alias WordId = Int
 
 type Msg
-  = GetGameResponse (RData.WebData Game)
+  = StartGame String
+  | GetGameResponse (RData.WebData Game)
   | CreateGameResponse (RData.WebData Game)
+  | OpenWordRequest WordId
+  | OpenWordResponse WordId (RData.WebData ())
   -- | PushUrl String
-  | StartGame String
   | UrlUpdate String
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -104,6 +110,26 @@ update msg model =
           , cmd
           )
 
+    OpenWordRequest wordId ->
+      ( model
+      , case model.game of
+          RData.Success game ->
+            apiOpenWord game.id wordId
+          _ ->
+            Cmd.none
+      )
+
+    OpenWordResponse wordId response ->
+      case response of
+        RData.Success () ->
+          case model.game of
+            RData.Success game ->
+              ( { model | game = RData.Success { game | opened = wordId :: game.opened } }, Cmd.none )
+            _ ->
+              ( model, Cmd.none )
+        _ ->
+          ( model, Cmd.none )
+
     UrlUpdate url ->
       let
         _ = Debug.log "update url: "  url
@@ -128,8 +154,8 @@ getGame gameId =
 createGame : Cmd Msg
 createGame =
   Http.post
-    { body = Http.emptyBody
-    , url = gameApi ""
+    { url = gameApi ""
+    , body = Http.emptyBody
     , expect = Http.expectJson (RData.fromResult >> CreateGameResponse) gameDecoder
     }
 
@@ -142,11 +168,19 @@ gameDecoder =
     (D.field "opened" (D.list D.int))
 
 
+apiOpenWord : String -> WordId -> Cmd Msg
+apiOpenWord gameId wordId =
+  Http.post
+    { url = gameApi <| "/" ++ gameId ++ "/open"
+    , body = Http.jsonBody <| E.object [ ("idx", E.int wordId) ]
+    , expect = Http.expectWhatever (RData.fromResult >> OpenWordResponse wordId)
+    }
+
 
 -- VIEW
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model =
   let 
     content = case model.game of
@@ -172,11 +206,13 @@ viewHttpError err =
     _ ->
       "Unknown error"
 
-viewGame : Game -> Html msg 
+viewGame : Game -> Html Msg
 viewGame game =
-    div [ Attr.class "field" ] (List.map (\word -> div [ Attr.class "card" ] [text word]) game.words)
+    div [ Attr.class "field" ] (List.indexedMap (viewWord game.id) game.words)
 
-
+viewWord : String -> WordId -> Word -> Html Msg
+viewWord gameId id word =
+  div [ Attr.class "card", onDoubleClick <| OpenWordRequest id ] [text word]
 
 -- PORTS
 

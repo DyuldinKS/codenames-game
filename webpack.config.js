@@ -55,10 +55,10 @@ module.exports = {
   },
   devtool: false,
   plugins: [
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: path.join(CLIENT_SRC, 'index.html'),
     }),
-    new CleanWebpackPlugin(),
     new webpack.SourceMapDevToolPlugin({
       exclude: [ELM_CHUNK],
     }),
