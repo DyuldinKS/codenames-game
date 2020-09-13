@@ -2,6 +2,7 @@ port module Main exposing (main)
 
 import Browser
 import Debug
+import Dict
 import Html exposing (Html, button, div, h1, p, text)
 import Html.Attributes as Attr
 import Html.Events exposing (onClick, onDoubleClick)
@@ -10,6 +11,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Regex as RE exposing (Regex)
 import RemoteData as RData
+import Set exposing (Set)
 
 
 main =
@@ -30,7 +32,7 @@ type alias Game =
     { id : String
     , words : List Word
     , teamWords : List (List Int)
-    , opened : List Int
+    , opened : Set Int
     }
 
 
@@ -163,7 +165,7 @@ update msg model =
 
 updateGameOpenedWords : List WordId -> Game -> Game
 updateGameOpenedWords openedWords game =
-    { game | opened = openedWords }
+    { game | opened = Set.fromList openedWords }
 
 
 
@@ -203,7 +205,7 @@ gameDecoder =
         (D.field "id" D.string)
         (D.field "words" (D.list D.string))
         (D.field "teamWords" (D.list (D.list D.int)))
-        (D.field "opened" (D.list D.int))
+        (D.field "opened" (D.map Set.fromList (D.list D.int)))
 
 
 apiOpenWord : String -> WordId -> Cmd Msg
