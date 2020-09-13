@@ -50,6 +50,22 @@ html, body {
   font-size: 1.25rem;
 }
 
+.card--team1 {
+  background-color: var(--blue);
+}
+
+.card--team2 {
+  background-color: var(--red);
+}
+
+.card--team3 {
+  background-color: var(--yellow);
+}
+
+.card--noteam {
+  background-color: var(--light-grey);
+}
+
 .counters {
   margin-top: 36px;
 }

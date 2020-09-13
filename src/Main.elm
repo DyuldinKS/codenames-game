@@ -9,6 +9,7 @@ import Html.Events exposing (onClick, onDoubleClick)
 import Http
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
+import List.Extra as ListX
 import Regex as RE exposing (Regex)
 import RemoteData as RData
 import Set exposing (Set)
@@ -259,12 +260,38 @@ viewHttpError err =
 
 viewGame : Game -> Html Msg
 viewGame game =
-    div [ Attr.class "field" ] (List.indexedMap (viewWord game.id) game.words)
+    div [ Attr.class "field" ] (List.indexedMap (viewWord game) game.words)
 
 
-viewWord : String -> WordId -> Word -> Html Msg
-viewWord gameId id word =
-    div [ Attr.class "card", onDoubleClick <| OpenWordRequest id ] [ text word ]
+viewWord : Game -> WordId -> Word -> Html Msg
+viewWord game id word =
+    div
+        [ Attr.classList <| getWordClassList game id
+        , onDoubleClick <| OpenWordRequest id
+        ]
+        [ text word ]
+
+
+getWordClassList : Game -> WordId -> List ( String, Bool )
+getWordClassList game wordId =
+    [ ( "card", True )
+    , ( getWordTeamClass game wordId, Set.member wordId game.opened )
+    ]
+
+
+getWordTeamClass : Game -> WordId -> String
+getWordTeamClass game wordId =
+    List.indexedMap Tuple.pair game.teamWords
+        |> ListX.find (\( _, teamWords ) -> List.member wordId teamWords)
+        |> Maybe.map Tuple.first
+        |> teamIdxToClass
+
+
+teamIdxToClass : Maybe Int -> String
+teamIdxToClass mTeamIdx =
+    Maybe.map ((++) "team" << String.fromInt << (+) 1) mTeamIdx
+        |> Maybe.withDefault "noteam"
+        |> (++) "card--"
 
 
 
