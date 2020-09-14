@@ -14,6 +14,7 @@ import RemoteData as RData
 import Set exposing (Set)
 
 
+main : Program String Model Msg
 main =
     Browser.element
         { init = init
@@ -271,22 +272,40 @@ viewGame game =
 viewWord : Game -> WordId -> Word -> Html Msg
 viewWord game id word =
     div
-        [ Attr.classList <| getWordClassList game id
-        , onDoubleClick <| OpenWordRequest id
-        ]
+        (List.append
+            [ Attr.classList <| getWordClassList id game ]
+            (if isWordOpened id game then
+                []
+
+             else
+                [ onDoubleClick <| OpenWordRequest id ]
+            )
+        )
         [ text word ]
 
 
-getWordClassList : Game -> WordId -> List ( String, Bool )
-getWordClassList game wordId =
-    [ ( "card", True )
-    , ( getWordTeamClass game wordId, wordId /= game.fail && Set.member wordId game.opened )
-    , ( "card--fail", wordId == game.fail )
-    ]
+isWordOpened : WordId -> Game -> Bool
+isWordOpened wordId game =
+    Set.member wordId game.opened
 
 
-getWordTeamClass : Game -> WordId -> String
-getWordTeamClass game wordId =
+getWordClassList : WordId -> Game -> List ( String, Bool )
+getWordClassList wordId game =
+    List.append
+        [ ( "card", True ) ]
+        (if isWordOpened wordId game then
+            [ ( "card--opened", True )
+            , ( getWordTeamClass wordId game, wordId /= game.fail )
+            , ( "card--fail", wordId == game.fail )
+            ]
+
+         else
+            []
+        )
+
+
+getWordTeamClass : WordId -> Game -> String
+getWordTeamClass wordId game =
     List.indexedMap Tuple.pair game.teamWords
         |> ListX.find (\( _, teamWords ) -> List.member wordId teamWords)
         |> Maybe.map Tuple.first
