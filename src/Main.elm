@@ -239,7 +239,7 @@ view model =
                     text "Loading..."
 
                 RData.Failure err ->
-                    text (viewHttpError err)
+                    text (httpErrorToString err)
 
                 RData.Success game ->
                     viewGame game
@@ -247,8 +247,8 @@ view model =
     div [ Attr.class "board" ] [ content ]
 
 
-viewHttpError : Http.Error -> String
-viewHttpError err =
+httpErrorToString : Http.Error -> String
+httpErrorToString err =
     case err of
         Http.BadBody message ->
             message
@@ -257,10 +257,10 @@ viewHttpError err =
             message
 
         Http.BadStatus status ->
-            String.fromInt status ++ ". Game not found."
+            String.fromInt status ++ ". Failed to fetch a game."
 
         _ ->
-            "Unknown error"
+            "Unknown HTTP error"
 
 
 viewGame : Game -> Html Msg
