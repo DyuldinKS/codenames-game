@@ -55,7 +55,9 @@ module.exports = {
   },
   devtool: false,
   plugins: [
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin({
+      cleanAfterEveryBuildPatterns: ['!*.html'],
+    }),
     new HtmlWebpackPlugin({
       template: path.join(CLIENT_SRC, 'index.html'),
     }),
