@@ -8,6 +8,7 @@ html {
   --grey: #9e9e9e;
   --snow: #eeeeee;
   --dark-blue: #0277bd;
+  --darkest-blue: #01579b;
   --carbon: #424242;
 }
 
@@ -36,6 +37,21 @@ html, body {
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
+}
+
+.game-title {
+  font-size: 20px;
+  margin: 8px 0 16px;
+  font-weight: lighter;
+}
+
+.game-title .id {
+  color: var(--dark-blue);
+  cursor: pointer;
+}
+
+.id:hover {
+  color: var(--darkest-blue);
 }
 
 .field {

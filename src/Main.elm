@@ -2,7 +2,7 @@ port module Main exposing (main)
 
 import Browser
 import Debug
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, button, div, span, text)
 import Html.Attributes as Attr
 import Html.Events exposing (onClick, onDoubleClick)
 import Http
@@ -112,6 +112,7 @@ type Msg
     | UpdateOpenedWords (List WordId)
     | UrlUpdate String
     | SetRole Role
+    | CopyGameUrl
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -145,7 +146,7 @@ update msg model =
                 RData.Success game ->
                     Cmd.batch
                         [ listenGameUpdates <| apiGameSubscribe game.id
-                        , pushUrl ("/" ++ game.id)
+                        , urlSender ("/" ++ game.id)
                         ]
 
                 _ ->
@@ -178,6 +179,9 @@ update msg model =
 
         SetRole role ->
             ( { model | role = role }, Cmd.none )
+
+        CopyGameUrl ->
+            ( model, copyGameUrlSender () )
 
 
 updateGameOpenedWords : List WordId -> Game -> Game
@@ -298,6 +302,15 @@ viewRoleSelectionScreen =
 
 viewGame : Game -> Bool -> Html Msg
 viewGame game isCaptain =
+    div []
+        [ div []
+            [ div [ Attr.class "game-title" ] [ text "Game id: ", span [ Attr.class "id", onClick CopyGameUrl ] [ text game.id ] ] ]
+        , viewBoard game isCaptain
+        ]
+
+
+viewBoard : Game -> Bool -> Html Msg
+viewBoard game isCaptain =
     div [ Attr.class "field" ] (List.indexedMap (viewWord game isCaptain) game.words)
 
 
@@ -355,7 +368,10 @@ teamIdxToClass mTeamIdx =
 -- PORTS
 
 
-port pushUrl : String -> Cmd msg
+port urlSender : String -> Cmd msg
+
+
+port copyGameUrlSender : () -> Cmd msg
 
 
 port listenGameUpdates : String -> Cmd msg

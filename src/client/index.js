@@ -9,9 +9,13 @@ const app = Elm.Main.init({
 
 const history = createBrowserHistory();
 
-app.ports.pushUrl.subscribe(url => {
-  console.log('pushUrl', url);
+app.ports.urlSender.subscribe(url => {
+  console.log('urlSender', url);
   history.push(url);
+});
+
+app.ports.copyGameUrlSender.subscribe(() => {
+  navigator.clipboard.writeText(location.href);
 });
 
 app.ports.listenGameUpdates.subscribe(url => {
