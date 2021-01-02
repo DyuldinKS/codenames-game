@@ -12,6 +12,7 @@ html {
 }
 
 html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
   font-size: 14px;
@@ -19,10 +20,22 @@ html, body {
   font-family: 'Roboto', Helvetica, Arial;
 }
 
-.board {
+.layout {
+  box-sizing: border-box;
   max-width: 920px;
+  height: 100%;
   margin: auto;
   padding: 16px;
+}
+
+.role-selection-screen {
+  margin: auto;
+  width: 70%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
 }
 
 .field {
@@ -35,6 +48,10 @@ html, body {
 }
 
 @media (max-width: 500px) {
+  .role-selection-screen {
+    width: 100%;
+  }
+
   .field {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }

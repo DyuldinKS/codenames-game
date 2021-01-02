@@ -30,6 +30,7 @@ main =
 
 type alias Model =
     { game : RData.WebData Game
+    , role : Role
     , pathname : String
     }
 
@@ -43,6 +44,12 @@ type alias Game =
     }
 
 
+type Role
+    = NotDefined
+    | SimplePlayer
+    | Captain
+
+
 type alias Word =
     String
 
@@ -53,7 +60,7 @@ type alias WordId =
 
 init : String -> ( Model, Cmd Msg )
 init pathname =
-    { game = RData.NotAsked, pathname = pathname }
+    { game = RData.NotAsked, role = NotDefined, pathname = pathname }
         |> update (StartGame pathname)
 
 
@@ -104,6 +111,7 @@ type Msg
     | OpenWordResponse WordId (RData.WebData ())
     | UpdateOpenedWords (List WordId)
     | UrlUpdate String
+    | SetRole Role
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -167,6 +175,9 @@ update msg model =
                     Debug.log "update url: " url
             in
             ( model, Cmd.none )
+
+        SetRole role ->
+            ( { model | role = role }, Cmd.none )
 
 
 updateGameOpenedWords : List WordId -> Game -> Game
@@ -243,9 +254,9 @@ view model =
                     text (httpErrorToString err)
 
                 RData.Success game ->
-                    viewGame game
+                    viewScreenByRole model.role game
     in
-    div [ Attr.class "board" ] [ content ]
+    div [ Attr.class "layout" ] [ content ]
 
 
 httpErrorToString : Http.Error -> String
@@ -264,16 +275,37 @@ httpErrorToString err =
             "Unknown HTTP error"
 
 
-viewGame : Game -> Html Msg
-viewGame game =
-    div [ Attr.class "field" ] (List.indexedMap (viewWord game) game.words)
+viewScreenByRole : Role -> Game -> Html Msg
+viewScreenByRole role game =
+    case role of
+        NotDefined ->
+            viewRoleSelectionScreen
+
+        SimplePlayer ->
+            viewGame game False
+
+        Captain ->
+            viewGame game True
 
 
-viewWord : Game -> WordId -> Word -> Html Msg
-viewWord game id word =
+viewRoleSelectionScreen : Html Msg
+viewRoleSelectionScreen =
+    div [ Attr.class "role-selection-screen" ]
+        [ button [ Attr.class "btn", onClick <| SetRole SimplePlayer ] [ text "Simple player" ]
+        , button [ Attr.class "btn", onClick <| SetRole Captain ] [ text "Captain" ]
+        ]
+
+
+viewGame : Game -> Bool -> Html Msg
+viewGame game isCaptain =
+    div [ Attr.class "field" ] (List.indexedMap (viewWord game isCaptain) game.words)
+
+
+viewWord : Game -> Bool -> WordId -> Word -> Html Msg
+viewWord game isCaptain id word =
     div
         (List.append
-            [ Attr.classList <| getWordClassList id game ]
+            [ Attr.classList <| getWordClassList id game isCaptain ]
             (if isWordOpened id game then
                 []
 
@@ -289,11 +321,11 @@ isWordOpened wordId game =
     Set.member wordId game.opened
 
 
-getWordClassList : WordId -> Game -> List ( String, Bool )
-getWordClassList wordId game =
+getWordClassList : WordId -> Game -> Bool -> List ( String, Bool )
+getWordClassList wordId game isCaptain =
     List.append
         [ ( "card", True ) ]
-        (if isWordOpened wordId game then
+        (if isCaptain || isWordOpened wordId game then
             [ ( "card--opened", True )
             , ( getWordTeamClass wordId game, wordId /= game.fail )
             , ( "card--fail", wordId == game.fail )
