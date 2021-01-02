@@ -3,9 +3,6 @@
   "main": "index.js",
   "author": "dyuldinks",
   "license": "MIT",
-  "engines": {
-    "node": "12.13.x"
-  },
   "scripts": {
     "start": "node src/server/index.js",
     "dev": "nodemon -w ./src/server ./src/server/index.js"
