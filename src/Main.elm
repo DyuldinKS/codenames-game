@@ -304,9 +304,53 @@ viewGame : Game -> Bool -> Html Msg
 viewGame game isCaptain =
     div []
         [ div []
-            [ div [ Attr.class "game-title" ] [ text "Game id: ", span [ Attr.class "id", onClick CopyGameUrl ] [ text game.id ] ] ]
+            [ div [ Attr.class "header" ] [ viewGameId game.id, viewCounters game ] ]
         , viewBoard game isCaptain
         ]
+
+
+viewGameId : String -> Html Msg
+viewGameId id =
+    div [ Attr.class "row" ]
+        [ text "Game id: "
+        , span [ Attr.class "id", onClick CopyGameUrl ] [ text id ]
+        ]
+
+
+viewCounters : Game -> Html Msg
+viewCounters game =
+    div [ Attr.class "row" ]
+        [ text "Words left: "
+        , List.map (countWordsLeft game) game.teamWords |> viewCountersByTeam
+        ]
+
+
+viewCountersByTeam : List Int -> Html Msg
+viewCountersByTeam counters =
+    span []
+        (getIndexedList counters
+            |> List.map
+                (\( idx, count ) ->
+                    span
+                        [ Attr.class ("color--team" ++ String.fromInt (idx + 1)) ]
+                        [ text <| String.fromInt count ]
+                )
+            |> List.intersperse (text " | ")
+        )
+
+
+countWordsLeft : Game -> List Int -> Int
+countWordsLeft game teamWords =
+    List.foldl
+        (\wordId acc ->
+            if isWordOpened wordId game then
+                acc - 1
+
+            else
+                acc
+        )
+        (List.length teamWords)
+        teamWords
 
 
 viewBoard : Game -> Bool -> Html Msg
@@ -351,7 +395,7 @@ getWordClassList wordId game isCaptain =
 
 getWordTeamClass : WordId -> Game -> String
 getWordTeamClass wordId game =
-    List.indexedMap Tuple.pair game.teamWords
+    getIndexedList game.teamWords
         |> ListX.find (\( _, teamWords ) -> List.member wordId teamWords)
         |> Maybe.map Tuple.first
         |> teamIdxToClass
@@ -381,3 +425,12 @@ port urlChangeListener : (String -> msg) -> Sub msg
 
 
 port openedWordsListener : (List Int -> msg) -> Sub msg
+
+
+
+-- UTILS
+
+
+getIndexedList : List x -> List ( Int, x )
+getIndexedList =
+    List.indexedMap Tuple.pair
