@@ -1,2 +1,6 @@
 node_modules
 package-lock.json
+dist
+
+elm-stuff
+**/elm.bundle.js
