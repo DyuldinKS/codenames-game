@@ -332,7 +332,7 @@ viewCountersByTeam counters =
             |> List.map
                 (\( idx, count ) ->
                     span
-                        [ Attr.class ("color--team" ++ String.fromInt (idx + 1)) ]
+                        [ Attr.class ("counter color--team" ++ String.fromInt (idx + 1)) ]
                         [ text <| String.fromInt count ]
                 )
             |> List.intersperse (text " | ")

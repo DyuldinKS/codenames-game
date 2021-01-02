@@ -13,16 +13,17 @@ html {
   --dark-red: #ef5350;
   --dark-yellow: #f9a825;
   --darkest-blue: #01579b;
-  --carbon: #424242;
+  --black: #000000;
 }
 
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-size: 14px;
+  font-size: 16px;
   background-color: var(--snow);
   font-family: 'Roboto', Helvetica, Arial;
+  font-weight: 300;
 }
 
 .layout {
@@ -44,10 +45,10 @@ html, body {
 }
 
 .header {
-  font-size: 18px;
+  font-size: 1.1rem;
   margin: 8px 0 16px;
-  font-weight: lighter;
-  color: var(--middle-grey);
+  font-weight: 100;
+  color: var(--black);
 }
 
 .header .row {
@@ -55,12 +56,17 @@ html, body {
 }
 
 .header .id {
-  color: var(--darkest-grey);
+  color: var(--black);
   cursor: pointer;
+  font-weight: 300;
 }
 
 .header .id:hover {
-  color: #000;
+  color: var(--dark-grey);
+}
+
+.header .counter {
+  font-weight: 300;
 }
 
 .field {
@@ -89,7 +95,7 @@ html, body {
   box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
     0px 1px 3px 0px rgba(0, 0, 0, 0.12);
   user-select: none;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
@@ -135,7 +141,7 @@ html, body {
   border: 1px solid var(--dark-grey);
   border-radius: 4px;
   text-decoration: none;
-  color: var(--carbon);
+  color: var(--darkest-grey);
   white-space: nowrap;
   text-align: center;
   cursor: pointer;
@@ -145,7 +151,7 @@ html, body {
 }
 
 .btn:hover {
-  border: 1px solid var(--dark-blue);;
+  border: 1px solid var(--dark-blue);
   background-color: rgba(225, 245, 254, .3);
   color: var(--dark-blue);
 }
