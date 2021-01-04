@@ -3,17 +3,175 @@ html {
   --blue: #b3e5fc;
   --red: #ffcdd2;
   --yellow: #fff9c4;
+  --middle-grey: #757575;
   --dark-grey: #616161;
+  --darkest-grey: #424242;
   --light-grey: #e0e0e0;
   --grey: #9e9e9e;
   --snow: #eeeeee;
   --dark-blue: #0277bd;
-  --carbon: #424242;
+  --dark-red: #ef5350;
+  --dark-yellow: #f9a825;
+  --darkest-blue: #01579b;
+  --black: #000000;
 }
 
 html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
-  font-size: 14px;
+  font-size: 16px;
   background-color: var(--snow);
+  font-family: 'Roboto', Helvetica, Arial;
+  font-weight: 300;
+}
+
+.layout {
+  box-sizing: border-box;
+  max-width: 920px;
+  height: 100%;
+  margin: auto;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.role-selection-screen {
+  margin: auto;
+  width: 70%;
+  min-height: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.header {
+  font-size: 1.1rem;
+  margin: 8px 0 16px;
+  font-weight: 100;
+  color: var(--black);
+}
+
+.header .row {
+  padding: 2px 0;
+}
+
+.header .id {
+  color: var(--black);
+  cursor: pointer;
+  font-weight: 300;
+}
+
+.header .id:hover {
+  color: var(--dark-grey);
+}
+
+.header .counter {
+  font-weight: 300;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-gap: 12px;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+}
+
+@media (max-width: 500px) {
+  .role-selection-screen {
+    width: 100%;
+  }
+
+  .field {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+.card {
+  padding: 8px 16px 12px;
+  border-radius: 4px;
+  background-color: var(--white);
+  box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  user-select: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.card--team1 {
+  background-color: var(--blue);
+}
+
+.card--team2 {
+  background-color: var(--red);
+}
+
+.card--team3 {
+  background-color: var(--yellow);
+}
+
+.card--noteam {
+  background-color: var(--light-grey);
+}
+
+.card--fail {
+  background-color: var(--dark-grey);
+  color: var(--white);
+}
+
+.card--opened {
+  cursor: initial;
+}
+
+.counters {
+  margin-top: 36px;
+}
+
+.counters__items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  grid-gap: 12px;
+  margin-top: 8px;
+}
+
+.btn {
+  margin: 4px;
+  padding: 8px 16px;
+  border: 1px solid var(--dark-grey);
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--darkest-grey);
+  white-space: nowrap;
+  text-align: center;
+  cursor: pointer;
+  background-color: transparent;
+  font-size: 1rem;
+  font-family: 'Roboto', Helvetica, Arial;
+}
+
+.btn:hover {
+  border: 1px solid var(--dark-blue);
+  background-color: rgba(225, 245, 254, .3);
+  color: var(--dark-blue);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.color--team1 {
+  color: var(--dark-blue);
+}
+
+.color--team2 {
+  color: var(--dark-red);
+}
+
+.color--team3 {
+  color: var(--dark-yellow);
 }
