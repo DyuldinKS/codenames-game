@@ -4,7 +4,8 @@
   "author": "dyuldinks",
   "license": "MIT",
   "scripts": {
-    "start": "node src/server/index.js",
+    "start:prod": "yarn run build && node src/server/index.js",
+    "build": "npx webpack",
     "dev": "nodemon -w ./src/server ./src/server/index.js"
   },
   "dependencies": {
