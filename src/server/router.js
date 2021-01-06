@@ -8,20 +8,8 @@ const { prop } = R;
 
 const DIST_DIR = path.join(__dirname, '../../dist/');
 
-const staticRoutes = (app, { games, createGame, generateId }) => {
+const staticRoutes = app => {
   app.use('/static', express.static(DIST_DIR));
-
-  // app.get(['/', /^\/start\/?$/], (req, res) => {
-  //   const gameId = generateId();
-  //   if (!prop(gameId, games)) {
-  //     games[gameId] = createGame(req.query);
-  //   }
-  //   res.redirect(`/${gameId}`);
-  // });
-
-  // app.get(['/:gameId', '/:gameId/admin'], checkingGameExistence(games), (req, res) => {
-  //   res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
-  // });
 
   app.get('*', (req, res) => {
     res.sendFile(path.join(DIST_DIR, 'index.html'));
