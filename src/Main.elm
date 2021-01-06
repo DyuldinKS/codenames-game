@@ -1,7 +1,6 @@
 port module Main exposing (main)
 
 import Browser
-import Debug
 import Html exposing (Html, button, div, span, text)
 import Html.Attributes as Attr
 import Html.Events exposing (onClick, onDoubleClick)
@@ -121,10 +120,6 @@ update msg model =
         StartGame pathname ->
             case extractGameId pathname of
                 Just gameId ->
-                    let
-                        _ =
-                            Debug.log "gameId: " gameId
-                    in
                     ( { model | game = RData.Loading }, getGame gameId )
 
                 Nothing ->
@@ -171,10 +166,6 @@ update msg model =
             ( model, Cmd.none )
 
         UrlUpdate url ->
-            let
-                _ =
-                    Debug.log "update url: " url
-            in
             ( model, Cmd.none )
 
         SetRole role ->
