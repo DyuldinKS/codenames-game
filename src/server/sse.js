@@ -57,7 +57,9 @@ const createSSE = id => {
     subscribe,
     unsubscribe,
     emit: (...args) => {
-      pingTimer.postpone();
+      if (pingTimer) {
+        pingTimer.postpone();
+      }
       return emit(...args);
     },
     subscriberCount,
