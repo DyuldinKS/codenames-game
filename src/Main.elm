@@ -286,7 +286,8 @@ viewScreenByRole role game =
 viewRoleSelectionScreen : Html Msg
 viewRoleSelectionScreen =
     div [ Attr.class "role-selection-screen" ]
-        [ button [ Attr.class "btn", onClick <| SetRole SimplePlayer ] [ text "Simple player" ]
+        [ div [] [ text "Choose a role:" ]
+        , button [ Attr.class "btn", onClick <| SetRole SimplePlayer ] [ text "Simple player" ]
         , button [ Attr.class "btn", onClick <| SetRole Captain ] [ text "Captain" ]
         ]
 
