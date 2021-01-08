@@ -283,12 +283,17 @@ viewScreenByRole role game =
             viewGame game True
 
 
+viewBtn : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+viewBtn attrs nodes =
+    button (List.concat [ attrs, [ Attr.class "btn" ] ]) nodes
+
+
 viewRoleSelectionScreen : Html Msg
 viewRoleSelectionScreen =
     div [ Attr.class "role-selection-screen" ]
         [ div [] [ text "Choose a role:" ]
-        , button [ Attr.class "btn", onClick <| SetRole SimplePlayer ] [ text "Simple player" ]
-        , button [ Attr.class "btn", onClick <| SetRole Captain ] [ text "Captain" ]
+        , viewBtn [ onClick <| SetRole SimplePlayer ] [ text "Simple player" ]
+        , viewBtn [ onClick <| SetRole Captain ] [ text "Captain" ]
         ]
 
 
@@ -296,8 +301,16 @@ viewGame : Game -> Bool -> Html Msg
 viewGame game isCaptain =
     div []
         [ div []
-            [ div [ Attr.class "header" ] [ viewGameId game.id, viewCounters game ] ]
+            [ div [ Attr.class "header" ] [ viewControls, viewGameId game.id, viewCounters game ] ]
         , viewBoard game isCaptain
+        ]
+
+
+viewControls : Html Msg
+viewControls =
+    div [ Attr.class "row", Attr.class "controls" ]
+        [ viewBtn [] [ text "New game" ]
+        , viewBtn [] [ text "Reselect role" ]
         ]
 
 

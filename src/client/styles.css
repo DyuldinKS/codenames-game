@@ -69,6 +69,14 @@ html, body {
   font-weight: 300;
 }
 
+.header .controls {
+  display: grid;
+  grid-gap: 4px;
+  justify-content: right;
+  grid-template-columns: repeat(2, auto);
+  margin-bottom: 16px;
+}
+
 .field {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -81,6 +89,11 @@ html, body {
 @media (max-width: 500px) {
   .role-selection-screen {
     width: 100%;
+  }
+
+  .header .controls {
+    grid-template-columns: auto;
+    justify-content:unset;
   }
 
   .field {
