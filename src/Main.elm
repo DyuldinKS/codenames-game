@@ -28,9 +28,9 @@ main =
 
 
 type alias Model =
-    { game : RData.WebData Game
+    { gameId : Maybe String
+    , game : RData.WebData Game
     , role : Role
-    , pathname : String
     }
 
 
@@ -59,8 +59,8 @@ type alias WordId =
 
 init : String -> ( Model, Cmd Msg )
 init pathname =
-    { game = RData.NotAsked, role = NotDefined, pathname = pathname }
-        |> update (StartGame pathname)
+    { game = RData.NotAsked, role = NotDefined, gameId = extractGameId pathname }
+        |> update StartGame
 
 
 
@@ -103,7 +103,7 @@ extractGameId =
 
 
 type Msg
-    = StartGame String
+    = StartGame
     | GetGameResponse (RData.WebData Game)
     | CreateGameResponse (RData.WebData Game)
     | OpenWordRequest WordId
@@ -112,13 +112,14 @@ type Msg
     | UrlUpdate String
     | SetRole Role
     | CopyGameUrl
+    | ResetGame
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        StartGame pathname ->
-            case extractGameId pathname of
+        StartGame ->
+            case model.gameId of
                 Just gameId ->
                     ( { model | game = RData.Loading }, getGame gameId )
 
@@ -173,6 +174,9 @@ update msg model =
 
         CopyGameUrl ->
             ( model, copyGameUrlSender () )
+
+        ResetGame ->
+            ( { model | gameId = Nothing, game = RData.Loading, role = NotDefined }, createGame )
 
 
 updateGameOpenedWords : List WordId -> Game -> Game
@@ -309,7 +313,7 @@ viewGame game isCaptain =
 viewControls : Html Msg
 viewControls =
     div [ Attr.class "row", Attr.class "controls" ]
-        [ viewBtn [] [ text "New game" ]
+        [ viewBtn [ onClick ResetGame ] [ text "New game" ]
         , viewBtn [] [ text "Reselect role" ]
         ]
 
