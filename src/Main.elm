@@ -57,9 +57,14 @@ type alias WordId =
     Int
 
 
+initialState : Model
+initialState =
+    { gameId = Nothing, game = RData.NotAsked, role = NotDefined }
+
+
 init : String -> ( Model, Cmd Msg )
 init pathname =
-    { game = RData.NotAsked, role = NotDefined, gameId = extractGameId pathname }
+    { initialState | gameId = extractGameId pathname }
         |> update StartGame
 
 
@@ -176,7 +181,7 @@ update msg model =
             ( model, copyGameUrlSender () )
 
         ResetGame ->
-            ( { model | gameId = Nothing, game = RData.Loading, role = NotDefined }, createGame )
+            ( { initialState | game = RData.Loading }, createGame )
 
 
 updateGameOpenedWords : List WordId -> Game -> Game
