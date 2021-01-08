@@ -118,6 +118,7 @@ type Msg
     | SetRole Role
     | CopyGameUrl
     | ResetGame
+    | ResetRole
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -182,6 +183,9 @@ update msg model =
 
         ResetGame ->
             ( { initialState | game = RData.Loading }, createGame )
+
+        ResetRole ->
+            ( { model | role = NotDefined }, Cmd.none )
 
 
 updateGameOpenedWords : List WordId -> Game -> Game
@@ -319,7 +323,7 @@ viewControls : Html Msg
 viewControls =
     div [ Attr.class "row", Attr.class "controls" ]
         [ viewBtn [ onClick ResetGame ] [ text "New game" ]
-        , viewBtn [] [ text "Reselect role" ]
+        , viewBtn [ onClick ResetRole ] [ text "Reselect role" ]
         ]
 
 
