@@ -4,9 +4,11 @@
   "author": "dyuldinks",
   "license": "MIT",
   "scripts": {
-    "start:prod": "yarn run build && node src/server/index.js",
-    "build": "npx webpack",
-    "dev": "nodemon -w ./src/server ./src/server/index.js"
+    "client:watch": "npx webpack --watch",
+    "client:build": "npx webpack",
+    "server:watch": "nodemon -w ./src/server ./src/server/index.js",
+    "server:start": "node src/server/index.js",
+    "start:prod": "yarn run client:build && yarn run server:start"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

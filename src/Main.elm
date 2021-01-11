@@ -28,9 +28,9 @@ main =
 
 
 type alias Model =
-    { game : RData.WebData Game
+    { gameId : Maybe String
+    , game : RData.WebData Game
     , role : Role
-    , pathname : String
     }
 
 
@@ -57,10 +57,15 @@ type alias WordId =
     Int
 
 
+initialState : Model
+initialState =
+    { gameId = Nothing, game = RData.NotAsked, role = NotDefined }
+
+
 init : String -> ( Model, Cmd Msg )
 init pathname =
-    { game = RData.NotAsked, role = NotDefined, pathname = pathname }
-        |> update (StartGame pathname)
+    { initialState | gameId = extractGameId pathname }
+        |> update StartGame
 
 
 
@@ -103,7 +108,7 @@ extractGameId =
 
 
 type Msg
-    = StartGame String
+    = StartGame
     | GetGameResponse (RData.WebData Game)
     | CreateGameResponse (RData.WebData Game)
     | OpenWordRequest WordId
@@ -112,13 +117,15 @@ type Msg
     | UrlUpdate String
     | SetRole Role
     | CopyGameUrl
+    | ResetGame
+    | ResetRole
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        StartGame pathname ->
-            case extractGameId pathname of
+        StartGame ->
+            case model.gameId of
                 Just gameId ->
                     ( { model | game = RData.Loading }, getGame gameId )
 
@@ -173,6 +180,12 @@ update msg model =
 
         CopyGameUrl ->
             ( model, copyGameUrlSender () )
+
+        ResetGame ->
+            ( { initialState | game = RData.Loading }, createGame )
+
+        ResetRole ->
+            ( { model | role = NotDefined }, Cmd.none )
 
 
 updateGameOpenedWords : List WordId -> Game -> Game
@@ -283,11 +296,17 @@ viewScreenByRole role game =
             viewGame game True
 
 
+viewBtn : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+viewBtn attrs nodes =
+    button (List.concat [ attrs, [ Attr.class "btn" ] ]) nodes
+
+
 viewRoleSelectionScreen : Html Msg
 viewRoleSelectionScreen =
     div [ Attr.class "role-selection-screen" ]
-        [ button [ Attr.class "btn", onClick <| SetRole SimplePlayer ] [ text "Simple player" ]
-        , button [ Attr.class "btn", onClick <| SetRole Captain ] [ text "Captain" ]
+        [ div [] [ text "Choose a role:" ]
+        , viewBtn [ onClick <| SetRole SimplePlayer ] [ text "Simple player" ]
+        , viewBtn [ onClick <| SetRole Captain ] [ text "Captain" ]
         ]
 
 
@@ -295,8 +314,16 @@ viewGame : Game -> Bool -> Html Msg
 viewGame game isCaptain =
     div []
         [ div []
-            [ div [ Attr.class "header" ] [ viewGameId game.id, viewCounters game ] ]
+            [ div [ Attr.class "header" ] [ viewControls, viewGameId game.id, viewCounters game ] ]
         , viewBoard game isCaptain
+        ]
+
+
+viewControls : Html Msg
+viewControls =
+    div [ Attr.class "row", Attr.class "controls" ]
+        [ viewBtn [ onClick ResetGame ] [ text "New game" ]
+        , viewBtn [ onClick ResetRole ] [ text "Reselect role" ]
         ]
 
 
