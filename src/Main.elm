@@ -31,6 +31,7 @@ type alias Model =
     { gameId : Maybe String
     , game : RData.WebData Game
     , role : Role
+    , hasTouchScreen : Bool
     }
 
 
@@ -59,13 +60,32 @@ type alias WordId =
 
 initialState : Model
 initialState =
-    { gameId = Nothing, game = RData.NotAsked, role = NotDefined }
+    { gameId = Nothing, game = RData.NotAsked, role = NotDefined, hasTouchScreen = False }
 
 
 init : String -> ( Model, Cmd Msg )
-init pathname =
-    { initialState | gameId = extractGameId pathname }
-        |> update StartGame
+init jsonFlags =
+    case D.decodeString initialDecoder jsonFlags of
+        Result.Ok flags ->
+            { initialState | gameId = extractGameId flags.pathname, hasTouchScreen = flags.hasTouchScreen }
+                |> update StartGame
+
+        Result.Err _ ->
+            -- create a new action ErrGame
+            update StartGame initialState
+
+
+type alias InitialData =
+    { pathname : String
+    , hasTouchScreen : Bool
+    }
+
+
+initialDecoder : Decoder InitialData
+initialDecoder =
+    D.map2 InitialData
+        (D.field "pathname" D.string)
+        (D.field "hasTouchScreen" D.bool)
 
 
 

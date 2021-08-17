@@ -2,9 +2,16 @@ import { createBrowserHistory } from 'history';
 import { Elm } from '../Main.elm';
 import './styles.css';
 
+const isTouchDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+};
+
 const app = Elm.Main.init({
   node: document.getElementById('elm-node'),
-  flags: location.pathname,
+  flags: JSON.stringify({
+    pathname: location.pathname,
+    hasTouchScreen: isTouchDevice(),
+  }),
 });
 
 const history = createBrowserHistory();
