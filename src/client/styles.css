@@ -2,7 +2,8 @@ html {
   --white: #ffffff;
   --blue: #b3e5fc;
   --red: #ffcdd2;
-  --yellow: #fff9c4;
+  --yellow: #f9fbe7;
+  --indigo: #c5cae9;
   --middle-grey: #757575;
   --dark-grey: #616161;
   --darkest-grey: #424242;
@@ -11,9 +12,11 @@ html {
   --snow: #eeeeee;
   --dark-blue: #0277bd;
   --dark-red: #ef5350;
-  --dark-yellow: #f9a825;
   --darkest-blue: #01579b;
+  --dark-indigo: #283593;
   --black: #000000;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -113,7 +116,7 @@ html, body {
 }
 
 .card--team1 {
-  background-color: var(--blue);
+  background-color: var(--indigo);
 }
 
 .card--team2 {
@@ -121,7 +124,7 @@ html, body {
 }
 
 .card--team3 {
-  background-color: var(--yellow);
+  background-color: var(--blue);
 }
 
 .card--noteam {
@@ -131,6 +134,10 @@ html, body {
 .card--fail {
   background-color: var(--dark-grey);
   color: var(--white);
+}
+
+.card--selected {
+  background-color: var(--yellow);
 }
 
 .card--opened {
@@ -176,7 +183,7 @@ html, body {
 }
 
 .color--team1 {
-  color: var(--dark-blue);
+  color: var(--dark-indigo);
 }
 
 .color--team2 {
@@ -184,5 +191,5 @@ html, body {
 }
 
 .color--team3 {
-  color: var(--dark-yellow);
+  color: var(--dark-blue);
 }
