@@ -32,8 +32,7 @@ type alias Model =
     { gameId : Maybe String
     , game : RData.WebData Game
     , role : Role
-    , hasTouchScreen : Bool
-    , selectedWordId : WordId
+    , touchScreenModel : TouchScreenModel
     }
 
 
@@ -60,21 +59,39 @@ type alias WordId =
     Int
 
 
+type alias TouchScreenModel =
+    { isSupported : Bool
+    , selectedWordToOpen : WordId
+    }
+
+
+initialState : Model
+initialState =
+    { gameId = Nothing
+    , game = RData.NotAsked
+    , role = NotDefined
+    , touchScreenModel = initialTouchScreenState
+    }
+
+
 noWordSelected : WordId
 noWordSelected =
     -1
 
 
-initialState : Model
-initialState =
-    { gameId = Nothing, game = RData.NotAsked, role = NotDefined, hasTouchScreen = False, selectedWordId = noWordSelected }
+initialTouchScreenState : TouchScreenModel
+initialTouchScreenState =
+    { isSupported = False, selectedWordToOpen = noWordSelected }
 
 
 init : String -> ( Model, Cmd Msg )
 init jsonFlags =
     case D.decodeString initialDecoder jsonFlags of
         Result.Ok flags ->
-            { initialState | gameId = extractGameId flags.pathname, hasTouchScreen = flags.hasTouchScreen }
+            { initialState
+                | gameId = extractGameId flags.pathname
+                , touchScreenModel = { initialTouchScreenState | isSupported = flags.hasTouchScreen }
+            }
                 |> update StartGame
 
         Result.Err _ ->
@@ -184,10 +201,10 @@ update msg model =
             )
 
         SelectWordToOpen wordId ->
-            ( { model | selectedWordId = wordId }, Cmd.none )
+            ( { model | touchScreenModel = updateTouchScreenSelectedWord model.touchScreenModel wordId }, Cmd.none )
 
         OpenWordRequest wordId ->
-            ( { model | selectedWordId = noWordSelected }
+            ( { model | touchScreenModel = updateTouchScreenSelectedWord model.touchScreenModel noWordSelected }
             , case model.game of
                 RData.Success game ->
                     apiOpenWord game.id wordId
@@ -217,6 +234,11 @@ update msg model =
 
         ResetRole ->
             ( { model | role = NotDefined }, Cmd.none )
+
+
+updateTouchScreenSelectedWord : TouchScreenModel -> WordId -> TouchScreenModel
+updateTouchScreenSelectedWord touchScreenModel wordId =
+    { touchScreenModel | selectedWordToOpen = wordId }
 
 
 updateGameOpenedWords : List WordId -> Game -> Game
@@ -293,7 +315,7 @@ view model =
                     text (httpErrorToString err)
 
                 RData.Success game ->
-                    viewScreenByRole model.role game model.hasTouchScreen model.selectedWordId
+                    viewScreenByRole model.role game model.touchScreenModel
     in
     div [ Attr.class "layout" ] [ content ]
 
@@ -314,17 +336,17 @@ httpErrorToString err =
             "Unknown HTTP error"
 
 
-viewScreenByRole : Role -> Game -> Bool -> WordId -> Html Msg
-viewScreenByRole role game hasTouchScreen selectedWordId =
+viewScreenByRole : Role -> Game -> TouchScreenModel -> Html Msg
+viewScreenByRole role game touchScreenModel =
     case role of
         NotDefined ->
             viewRoleSelectionScreen
 
         SimplePlayer ->
-            viewGame game False hasTouchScreen selectedWordId
+            viewGame game False touchScreenModel
 
         Captain ->
-            viewGame game True hasTouchScreen selectedWordId
+            viewGame game True touchScreenModel
 
 
 viewBtn : List (Html.Attribute msg) -> List (Html msg) -> Html msg
@@ -341,12 +363,12 @@ viewRoleSelectionScreen =
         ]
 
 
-viewGame : Game -> Bool -> Bool -> WordId -> Html Msg
-viewGame game isCaptain hasTouchScreen selectedWordId =
+viewGame : Game -> Bool -> TouchScreenModel -> Html Msg
+viewGame game isCaptain touchScreenModel =
     div []
         [ div []
             [ div [ Attr.class "header" ] [ viewControls, viewGameId game.id, viewCounters game ] ]
-        , viewBoard game isCaptain hasTouchScreen selectedWordId
+        , viewBoard game isCaptain touchScreenModel
         ]
 
 
@@ -402,9 +424,11 @@ countWordsLeft game teamWords =
         teamWords
 
 
-viewBoard : Game -> Bool -> Bool -> WordId -> Html Msg
-viewBoard game isCaptain hasTouchScreen selectedWordId =
-    div [ Attr.class "field" ] (List.indexedMap (viewWord game isCaptain hasTouchScreen selectedWordId) game.words)
+viewBoard : Game -> Bool -> TouchScreenModel -> Html Msg
+viewBoard game isCaptain touchScreenModel =
+    div
+        [ Attr.class "field" ]
+        (List.indexedMap (viewWord game isCaptain touchScreenModel) game.words)
 
 
 onTouchStart : (Touch.Event -> msg) -> Html.Attribute msg
@@ -413,25 +437,17 @@ onTouchStart =
         |> Touch.onWithOptions "touchstart"
 
 
-viewWord : Game -> Bool -> Bool -> WordId -> WordId -> Word -> Html Msg
-viewWord game isCaptain hasTouchScreen selectedWordId id word =
+viewWord : Game -> Bool -> TouchScreenModel -> WordId -> Word -> Html Msg
+viewWord game isCaptain touchScreenModel id word =
     div
         (List.append
-            [ Attr.classList <| getWordClassList id game isCaptain selectedWordId ]
+            [ Attr.classList <| getWordClassList id game isCaptain touchScreenModel.selectedWordToOpen ]
             (if isWordOpened id game then
                 []
 
-             else if hasTouchScreen then
-                [ -- Touch.onEnd
-                  -- (\event ->
-                  --     let
-                  --         tmp =
-                  --             Debug.log "endEvent" event
-                  --     in
-                  --     SelectWordToOpen id
-                  -- )
-                  onTouchStart
-                    (if id == selectedWordId then
+             else if touchScreenModel.isSupported then
+                [ onTouchStart
+                    (if id == touchScreenModel.selectedWordToOpen then
                         \_ -> OpenWordRequest id
 
                      else
